@@ -1,0 +1,26 @@
+{
+  "name": "rpg-material",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Krea 2 中式 RPG 城镇素材管理台",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^2.2.11",
+    "@rsbuild/plugin-react": "^1.4.2",
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "typescript": "^5.9.3"
+  }
+}

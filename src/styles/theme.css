@@ -1,0 +1,236 @@
+/*
+ * 中式古风配色与基础样式。
+ * 取色直接呼应素材本身的风格：暖米色墙面、深色木构、灰瓦、暗红点缀、石色。
+ * 不引 UI 库，靠这些变量把质感统一起来。
+ */
+
+:root {
+  /* 纸与墙面 */
+  --paper: #f3ece0;
+  --paper-2: #ece2d2;
+  --paper-3: #e2d6c2;
+  --wall: #efe6d6;
+
+  /* 深色木构 */
+  --wood: #3b2a1d;
+  --wood-2: #55402d;
+  --wood-3: #6d543c;
+
+  /* 灰瓦与石 */
+  --tile: #6f6d67;
+  --tile-2: #8c8a83;
+  --tile-3: #c3bfb5;
+  --stone: #b9b2a4;
+
+  /* 朱砂与金 */
+  --cinnabar: #9c2b25;
+  --cinnabar-2: #b8433a;
+  --cinnabar-soft: #f0dcd7;
+  --gold: #a8863f;
+
+  --ink: #2a241d;
+  --ink-2: #574c3e;
+  --ink-3: #8a7c69;
+
+  --ok: #4f7a52;
+  --warn: #a8762a;
+  --danger: #8e2f2a;
+
+  --radius: 4px;
+  --radius-lg: 6px;
+  --line: 1px solid var(--tile-3);
+  --line-strong: 1px solid var(--wood-2);
+
+  --shadow-sm: 0 1px 2px rgba(59, 42, 29, 0.08);
+  --shadow: 0 2px 8px rgba(59, 42, 29, 0.1);
+  --shadow-lg: 0 8px 32px rgba(59, 42, 29, 0.22);
+
+  --font-serif: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', Georgia, serif;
+  --font-sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, -apple-system,
+    'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --header-h: 56px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  margin: 0;
+  color: var(--ink);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* ── 通用小部件 ───────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-2);
+  color: var(--ink);
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s;
+}
+.btn:hover:not(:disabled) {
+  background: var(--paper-3);
+  border-color: var(--tile-2);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--cinnabar);
+  border-color: var(--cinnabar);
+  color: #fdf6ef;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--cinnabar-2);
+  border-color: var(--cinnabar-2);
+}
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--paper-3);
+  border-color: transparent;
+}
+/* 删除类操作：只在二次确认那一步出现，平时不露红 */
+.btn-danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fdf1ef;
+}
+.btn-danger:hover:not(:disabled) {
+  background: #a5382f;
+  border-color: #a5382f;
+}
+.btn-sm {
+  padding: 2px 7px;
+  font-size: 12px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: var(--line);
+  border-radius: 999px;
+  background: var(--paper-2);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.chip-active {
+  background: var(--cinnabar-soft);
+  border-color: var(--cinnabar);
+  color: var(--cinnabar);
+}
+
+.tag {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 2px;
+  background: var(--paper-3);
+  color: var(--ink-2);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 5px 8px;
+  border: var(--line);
+  border-radius: var(--radius);
+  background: #fbf7ef;
+  outline: none;
+}
+.input:focus,
+.textarea:focus,
+.select:focus {
+  border-color: var(--cinnabar);
+  box-shadow: 0 0 0 2px var(--cinnabar-soft);
+}
+.textarea {
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.hint {
+  color: var(--ink-3);
+  font-size: 11.5px;
+}
+.mono {
+  font-family: var(--font-mono);
+}
+.empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 40px 20px;
+  color: var(--ink-3);
+  text-align: center;
+}
+
+/* 滚动条也收一下，免得破坏古风 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--tile-3);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--tile-2);
+  background-clip: content-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
