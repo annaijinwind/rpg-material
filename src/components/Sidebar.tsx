@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { CATEGORY_ORDER, FAMILY_LABEL, categoryLabel, type AssetStatus } from '../data/types'
 import { useAppStore } from '../store/useAppStore'
 import { filterAssets, useEffectiveAssets } from '../store/selectors'
+import { toast } from './Toast'
 
 interface Bucket {
   total: number
@@ -21,6 +22,7 @@ export function Sidebar() {
   const query = useAppStore((s) => s.query)
   const setQuery = useAppStore((s) => s.setQuery)
   const select = useAppStore((s) => s.select)
+  const createCustomBuilding = useAppStore((s) => s.createCustomBuilding)
 
   const { byCategory, byFamily, overall } = useMemo(() => {
     const statusOf = (id: string) => patches[id]?.status ?? 'todo'
@@ -103,6 +105,19 @@ export function Sidebar() {
       })}
 
       <div className="sidebar-foot">
+        <button
+          type="button"
+          className="btn btn-sm"
+          style={{ width: '100%', marginBottom: 10 }}
+          title="空白新建一栋建筑，之后用「额外构件」和关键词字段填内容"
+          onClick={() => {
+            const id = createCustomBuilding()
+            select(id)
+            toast('已新建空白建筑，可在右侧改名字、勾构件')
+          }}
+        >
+          ＋ 新建空白建筑
+        </button>
         <div className="hint">
           <span className="kbd">Ctrl/⌘ K</span> 搜索 · <span className="kbd">↑</span>
           <span className="kbd">↓</span> 切换素材

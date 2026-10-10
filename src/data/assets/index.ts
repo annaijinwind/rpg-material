@@ -38,6 +38,34 @@ export function suggestedPath(asset: Asset): string {
   return `03_Decoration/${sub}/${name}`
 }
 
+/**
+ * 自定义建筑的 id 前缀。
+ *
+ * 种子目录里的 id 都是有意义的前缀（building. / terrain. / decoration.），
+ * 用 custom. 前缀能把「用户建的」和「随代码走的」一眼分开，
+ * 也顺便保证了不会撞 id。
+ */
+export const CUSTOM_PREFIX = 'custom.'
+
+export function isCustomAsset(id: string): boolean {
+  return id.startsWith(CUSTOM_PREFIX)
+}
+
+/** 自定义建筑的 id：把英文名转成 slug，撞了就加序号。 */
+export function makeCustomAssetId(zh: string, en: string, taken: Set<string>): string {
+  const slug =
+    en
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 40) || 'building'
+  let id = `${CUSTOM_PREFIX}${slug}`
+  let n = 2
+  while (taken.has(id)) id = `${CUSTOM_PREFIX}${slug}-${n++}`
+  void zh
+  return id
+}
+
 /** 开发期自检：重复 id 会让 localStorage 补丁串味，必须在启动时就发现。 */
 export function validateCatalog(assets: Asset[] = ASSETS): string[] {
   const problems: string[] = []

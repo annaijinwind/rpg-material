@@ -1,5 +1,6 @@
 import type { Asset, AssetFamily } from '../data/types'
 import type { StyleConfig } from './templates'
+import { applySuperseded, fragmentConflicts, resolveFragments } from './fragments'
 
 /**
  * 提示词引擎。纯函数，不读模块级可变状态，方便在列表里对上百条素材直接重算。
@@ -145,29 +146,51 @@ function partsFor(asset: Asset, style: StyleConfig, negative: string): PromptPar
   ].filter((p) => p.value)
 }
 
-/** 超过这个词数就提醒一句：提示词太长会稀释重点。 */
-const WORD_COUNT_SOFT_LIMIT = 190
+/**
+ * 这里原本有一条「提示词偏长」的警告，阈值 190 词。
+ * 但提示词的固定骨架（视角 + 风格块 + 背景 + 收尾）就有 260 词以上，
+ * 85 条里有 68 条在报警——误报太多的警告等于没有警告，所以删掉。
+ * 真要看长度，PromptBox 上已经显示了词数。
+ */
 
 export function buildPrompt(asset: Asset, style: StyleConfig): BuiltPrompt {
-  const negative = negativeFor(asset, style)
-  const vars = varsFor(asset, style, style.appendNegativeInline ? negative : '')
-  const positive = fillTemplate(templateFor(asset, style), vars)
+  // 勾选的构件：多选组追加，单选组先剔掉同组旧词再追加（替换语义），规模替换 size
+  const picked = resolveFragments(asset.extraFragments)
+  const effective: Asset = asset.extraFragments?.length
+    ? {
+        ...asset,
+        features: [...applySuperseded(asset.features, picked.superseded), ...picked.features],
+        details: [...applySuperseded(asset.details, picked.superseded), ...picked.details],
+        size: picked.size ?? asset.size,
+      }
+    : asset
 
-  const parts = partsFor(asset, style, negative)
+  const negative = negativeFor(effective, style)
+  const vars = varsFor(effective, style, style.appendNegativeInline ? negative : '')
+  const positive = fillTemplate(templateFor(effective, style), vars)
+
+  const parts = partsFor(effective, style, negative)
   const combined = negative ? `${positive}\n\n${negative}` : positive
   const wordCount = (style.appendNegativeInline ? combined : positive).split(/\s+/).filter(Boolean).length
 
   const warnings: string[] = []
-  if (!asset.en.trim()) warnings.push('缺少英文名，提示词主体为空')
-  if (asset.family === 'building' && !asset.size) warnings.push('缺少建筑尺寸，BUILDING_SIZE 为空')
-  if (!asset.features?.length) warnings.push('缺少特征关键词，提示词会偏空泛')
-  if (wordCount > WORD_COUNT_SOFT_LIMIT) {
-    warnings.push(`提示词偏长（${wordCount} 词），关键词太多时 Krea 容易抓不住重点`)
+  if (!effective.en.trim()) warnings.push('缺少英文名，提示词主体为空')
+  if (effective.family === 'building' && !effective.size) {
+    warnings.push('缺少建筑尺寸，BUILDING_SIZE 为空')
   }
+  if (!effective.features?.length) warnings.push('缺少特征关键词，提示词会偏空泛')
   if (/\{\{\w+\}\}/.test(positive)) warnings.push('模板里有未识别的占位符，请到风格设置里检查')
 
+  // 构件库改过之后，存档里可能留下已经不存在的 id
+  if (picked.unknown.length) {
+    warnings.push(`有 ${picked.unknown.length} 个勾选的构件已经不在构件库里了，请重新勾选`)
+  }
+  for (const conflict of fragmentConflicts(effective, asset.extraFragments)) {
+    warnings.push(conflict)
+  }
+
   // 这条路很容易踩：这是要铺满整格的 tile，一旦要求白底/透明，出来的图就没法拼图了。
-  if (!isIsolated(asset) && /white background|transparent/i.test(positive)) {
+  if (!isIsolated(effective) && /white background|transparent/i.test(positive)) {
     warnings.push(
       '这是要铺满整格的地形贴图，提示词里出现了「白底 / 透明」——白底的砖拼不成地图，请去掉',
     )

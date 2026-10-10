@@ -6,15 +6,30 @@ import type { StyleConfig } from '../prompt/templates'
 import type { AssetPatch, Query } from './useAppStore'
 import { useAppStore } from './useAppStore'
 
-/** seed 数据 ⊕ 用户字段覆盖，得到该素材当前实际使用的样子。 */
+/** seed 数据 ⊕ 用户覆盖，得到该素材当前实际使用的样子。 */
 export function resolveAsset(seed: Asset, patch?: AssetPatch): Asset {
-  if (!patch?.fields) return seed
-  return { ...seed, ...patch.fields }
+  if (!patch) return seed
+  return {
+    ...seed,
+    ...patch.fields,
+    // 勾选的构件：patch 里没动过就沿用素材自带的（自定义建筑会带）
+    extraFragments: patch.extraFragments ?? seed.extraFragments,
+  }
 }
 
+/**
+ * 完整的素材表：种子目录 ∪ 用户自建建筑，各自再叠加本地修改。
+ *
+ * 这是全应用唯一该用来取素材的地方。直接 import ASSETS 会漏掉自定义建筑
+ * ——之前批量导出就踩过这个坑。
+ */
 export function useEffectiveAssets(): Asset[] {
   const patches = useAppStore((s) => s.patches)
-  return useMemo(() => ASSETS.map((a) => resolveAsset(a, patches[a.id])), [patches])
+  const customAssets = useAppStore((s) => s.customAssets)
+  return useMemo(
+    () => [...ASSETS, ...customAssets].map((a) => resolveAsset(a, patches[a.id])),
+    [patches, customAssets],
+  )
 }
 
 export function useAssetById(id: string | null): Asset | null {

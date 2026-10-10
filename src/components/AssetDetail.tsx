@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { FAMILY_LABEL, STATUS_LABEL, categoryLabel, type AssetStatus } from '../data/types'
+import { isCustomAsset } from '../data/assets'
 import { suggestedPath } from '../data/assets'
 import { useAppStore } from '../store/useAppStore'
 import { useSelectedRow } from '../store/selectors'
+import { FragmentPicker } from './FragmentPicker'
 import { ImageLinks } from './ImageLinks'
 import { MetaEditor } from './MetaEditor'
 import { PromptBox } from './PromptBox'
@@ -17,6 +20,10 @@ export function AssetDetail() {
   const resetAsset = useAppStore((s) => s.resetAsset)
   const patches = useAppStore((s) => s.patches)
   const selectedId = useAppStore((s) => s.selectedId)
+  const createCustomBuilding = useAppStore((s) => s.createCustomBuilding)
+  const deleteCustomAsset = useAppStore((s) => s.deleteCustomAsset)
+  const select = useAppStore((s) => s.select)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   if (!row) {
     return (
@@ -51,6 +58,20 @@ export function AssetDetail() {
           {asset.phase && <span className="tag">第{['一', '二', '三'][asset.phase - 1]}期</span>}
           {asset.tileable === false && <span className="tag">独立件</span>}
           <span className="card-spacer" />
+          {asset.family === 'building' && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              title="用这栋建筑当前的样子复制出一栋自建建筑，之后可以随便改"
+              onClick={() => {
+                const id = createCustomBuilding(asset)
+                select(id)
+                toast(`已创建「${asset.zh} 副本」，可在下面改名字`)
+              }}
+            >
+              另存为新建筑
+            </button>
+          )}
           {hasLocalChanges && (
             <button
               type="button"
@@ -96,6 +117,15 @@ export function AssetDetail() {
           <PromptBox row={row} />
         </div>
 
+        {asset.family === 'building' && (
+          <div className="section">
+            <div className="section-head">
+              <h3>额外构件</h3>
+            </div>
+            <FragmentPicker asset={asset} />
+          </div>
+        )}
+
         <div className="section">
           <div className="section-head">
             <h3>关键词字段</h3>
@@ -123,6 +153,51 @@ export function AssetDetail() {
               </button>
             </div>
           </div>
+          {isCustomAsset(asset.id) && (
+            <div className="field-row">
+              <span className="field-label">自建建筑</span>
+              <div>
+                {confirmingDelete ? (
+                  <>
+                    <div className="confirm-text" style={{ marginBottom: 6 }}>
+                      删掉「{asset.zh}」？它的状态、备注、图片链接和所有修改会一起没掉，
+                      存档文件里导出过的副本不受影响。
+                    </div>
+                    <div className="image-slot-actions" style={{ marginTop: 0 }}>
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        onClick={() => {
+                          deleteCustomAsset(asset.id)
+                          select(null)
+                          setConfirmingDelete(false)
+                          toast(`已删除「${asset.zh}」`)
+                        }}
+                      >
+                        删除
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm"
+                        onClick={() => setConfirmingDelete(false)}
+                      >
+                        取消
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    onClick={() => setConfirmingDelete(true)}
+                  >
+                    删除这栋建筑
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="field-row">
             <label className="field-label" htmlFor="asset-note">
               备注

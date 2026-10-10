@@ -43,6 +43,14 @@ export interface Asset {
   tags: string[]
   /** 建筑三阶段规划，来自文档 §13。地形与装饰不适用。 */
   phase?: 1 | 2 | 3
+  /**
+   * 额外勾选的构件 id（见 src/data/fragments.ts）。
+   *
+   * 只在建筑上有意义，是「在自带关键词之外再加点什么」。
+   * 存 id 而不是存文本，是为了让措辞能集中维护——改一次构件库，所有用到它的建筑一起变。
+   * 种子数据里一般没有这个字段；用户在界面上勾的会落在 AssetPatch 上。
+   */
+  extraFragments?: string[]
 }
 
 /** 施工状态默认值。 */
@@ -70,6 +78,8 @@ export const FAMILY_LABEL: Record<AssetFamily, string> = {
  */
 export const CATEGORY_LABEL: Record<string, string> = {
   建筑: '建筑',
+  /** 用户在界面上自己建的建筑，单独归一类，方便一眼找到。 */
+  自建: '自建',
   Ground: '地面',
   Road: '道路',
   Water: '水域',
@@ -85,7 +95,7 @@ export function categoryLabel(category: string): string {
 
 /** 分类树顺序：分类名 → 该分类下的家族。决定左侧栏的排列。 */
 export const CATEGORY_ORDER: Array<{ family: AssetFamily; categories: string[] }> = [
-  { family: 'building', categories: ['建筑'] },
+  { family: 'building', categories: ['建筑', '自建'] },
   { family: 'terrain', categories: ['Ground', 'Road', 'Water', 'Boundary'] },
   { family: 'decoration', categories: ['树木', '杂物'] },
 ]

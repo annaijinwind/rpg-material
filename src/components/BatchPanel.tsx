@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { ASSETS, CATALOG_VERSION, suggestedPath } from '../data/assets'
+import { CATALOG_VERSION, suggestedPath } from '../data/assets'
 import { FAMILY_LABEL, STATUS_LABEL, categoryLabel } from '../data/types'
-import { buildRows, useFilteredAssets, type PromptRow } from '../store/selectors'
+import { buildRows, useEffectiveAssets, useFilteredAssets, type PromptRow } from '../store/selectors'
 import { useAppStore } from '../store/useAppStore'
 import { copyText, downloadJson, downloadText } from '../store/persist'
 import { toast } from './Toast'
@@ -106,11 +106,13 @@ export function BatchPanel() {
   const query = useAppStore((s) => s.query)
   const toggleSave = useAppStore((s) => s.toggleSave)
   const filtered = useFilteredAssets()
+  // 用有效素材表，不能直接用 ASSETS——那样会漏掉用户自建的建筑
+  const allAssets = useEffectiveAssets()
 
   const [scope, setScope] = useState<'filtered' | 'all'>('filtered')
 
-  const isFiltered = scope === 'filtered' && filtered.length !== ASSETS.length
-  const assets = scope === 'filtered' ? filtered : ASSETS
+  const isFiltered = scope === 'filtered' && filtered.length !== allAssets.length
+  const assets = scope === 'filtered' ? filtered : allAssets
   const rows = buildRows(assets, patches, style)
   const localCount = Object.keys(patches).length
   const stamp = new Date().toISOString().slice(0, 10)
@@ -145,7 +147,7 @@ export function BatchPanel() {
                 className={scope === 'all' ? 'chip chip-active' : 'chip'}
                 onClick={() => setScope('all')}
               >
-                全部素材（{ASSETS.length}）
+                全部素材（{allAssets.length}）
               </button>
             </div>
             <p className="hint" style={{ marginBottom: 0 }}>
@@ -238,7 +240,7 @@ export function BatchPanel() {
                 onClick={() => {
                   downloadJson(`catalog-${stamp}.json`, {
                     catalogVersion: CATALOG_VERSION,
-                    assets: ASSETS,
+                    assets: allAssets,
                   })
                   toast('已导出目录数据')
                 }}

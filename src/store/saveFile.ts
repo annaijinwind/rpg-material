@@ -1,4 +1,5 @@
-import { ASSET_BY_ID, CATALOG_VERSION } from '../data/assets'
+import { CUSTOM_PREFIX, CATALOG_VERSION } from '../data/assets'
+import type { Asset } from '../data/types'
 import { buildDefaultStyleConfig, mergeStyle, type StyleConfig } from '../prompt/templates'
 import type { AssetPatch } from './useAppStore'
 
@@ -33,11 +34,48 @@ export interface SaveFile {
   exportedAt: string
   patchCount: number
   patches: Record<string, AssetPatch>
+  /**
+   * 用户在界面上自己建的建筑。
+   * 它们不属于随代码走的种子目录，所以必须跟存档一起走，否则换台机器就没了。
+   */
+  customAssets: Asset[]
   style: SavedStyle
 }
 
+/** 自定义建筑的字段顺序固定下来，diff 才稳定。 */
+const ASSET_KEYS = [
+  'id',
+  'family',
+  'category',
+  'zh',
+  'en',
+  'size',
+  'features',
+  'details',
+  'extraFragments',
+  'tags',
+  'phase',
+] as const
+
+function canonicalAsset(asset: Asset): Asset {
+  const out: Record<string, unknown> = {}
+  for (const key of ASSET_KEYS) {
+    const value = asset[key]
+    if (value === undefined) continue
+    out[key] = value
+  }
+  return out as unknown as Asset
+}
+
 /** 补丁里字段的固定顺序。顺序固定 = diff 稳定。 */
-const PATCH_KEYS = ['status', 'note', 'positiveOverride', 'fields', 'images'] as const
+const PATCH_KEYS = [
+  'status',
+  'note',
+  'positiveOverride',
+  'fields',
+  'extraFragments',
+  'images',
+] as const
 const FIELD_KEYS = ['zh', 'en', 'size', 'features', 'details', 'aesthetic'] as const
 
 function canonicalFields(fields: NonNullable<AssetPatch['fields']>): NonNullable<AssetPatch['fields']> {
@@ -66,9 +104,15 @@ function canonicalPatch(patch: AssetPatch): AssetPatch {
 export function buildSaveFile(
   patches: Record<string, AssetPatch>,
   style: StyleConfig,
+  customAssets: Asset[] = [],
 ): SaveFile {
   const sorted: Record<string, AssetPatch> = {}
   for (const id of Object.keys(patches).sort()) sorted[id] = canonicalPatch(patches[id]!)
+
+  // 自定义建筑也按 id 排序，同一个建筑在文件里的位置固定
+  const custom = [...customAssets]
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map(canonicalAsset)
 
   return {
     formatVersion: SAVE_FORMAT_VERSION,
@@ -77,6 +121,7 @@ export function buildSaveFile(
     exportedAt: new Date().toISOString(),
     patchCount: Object.keys(sorted).length,
     patches: sorted,
+    customAssets: custom,
     style: toSavedStyle(style),
   }
 }
@@ -151,6 +196,8 @@ export function parseSaveFile(text: string): ParseResult {
           exportedAt: '',
           patchCount: entries.length,
           patches: raw as Record<string, AssetPatch>,
+          // 旧版格式没有自定义建筑
+          customAssets: [],
           style: toSavedStyle(buildDefaultStyleConfig()),
         },
       }
@@ -178,6 +225,7 @@ export function parseSaveFile(text: string): ParseResult {
       exportedAt: typeof raw.exportedAt === 'string' ? raw.exportedAt : '',
       patchCount: Object.keys(patches).length,
       patches: patches as Record<string, AssetPatch>,
+      customAssets: sanitizeCustomAssets(raw.customAssets),
       // 存档里的风格配置来自「用户随手选的一个文件」，属于不可信输入，
       // 走 mergeStyle 逐字段校验类型，缺的、类型不对的都用默认值补
       style: toSavedStyle(mergeStyle(style)),
@@ -185,15 +233,52 @@ export function parseSaveFile(text: string): ParseResult {
   }
 }
 
-/** 过滤掉当前目录里不存在的 id。返回保留的补丁和被丢掉的数量。 */
-export function pruneToCatalog(patches: Record<string, AssetPatch>): {
-  kept: Record<string, AssetPatch>
-  dropped: number
-} {
+/**
+ * 校验自定义建筑。
+ *
+ * 这是**用户手选文件里的数据**，不能直接信。逐项检查必需字段，
+ * 不合格的整个丢掉——宁可少一栋建筑，也不能让半截数据进到目录里把界面搞崩。
+ */
+function sanitizeCustomAssets(raw: unknown): Asset[] {
+  if (!Array.isArray(raw)) return []
+  const out: Asset[] = []
+  for (const item of raw) {
+    if (!isPlainObject(item)) continue
+    const { id, zh, en, family } = item
+    if (typeof id !== 'string' || !id.startsWith(CUSTOM_PREFIX)) continue
+    if (typeof zh !== 'string' || typeof en !== 'string') continue
+    if (family !== 'building') continue
+
+    const strArray = (v: unknown) => (Array.isArray(v) ? v.filter((s): s is string => typeof s === 'string') : [])
+    out.push({
+      id,
+      family: 'building',
+      category: typeof item.category === 'string' ? item.category : '自建',
+      zh,
+      en,
+      size: typeof item.size === 'string' ? item.size : undefined,
+      features: strArray(item.features),
+      details: strArray(item.details),
+      extraFragments: strArray(item.extraFragments),
+      tags: strArray(item.tags),
+      phase: item.phase === 1 || item.phase === 2 || item.phase === 3 ? item.phase : undefined,
+    })
+  }
+  return out
+}
+
+/**
+ * 过滤掉当前既不在种子目录、也不在自定义建筑里的 id。
+ * 返回保留的补丁和被丢掉的数量。
+ */
+export function pruneToPatches(
+  patches: Record<string, AssetPatch>,
+  knownIds: ReadonlySet<string>,
+): { kept: Record<string, AssetPatch>; dropped: number } {
   const kept: Record<string, AssetPatch> = {}
   let dropped = 0
   for (const [id, patch] of Object.entries(patches)) {
-    if (ASSET_BY_ID.has(id)) kept[id] = patch
+    if (knownIds.has(id)) kept[id] = patch
     else dropped++
   }
   return { kept, dropped }

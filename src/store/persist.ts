@@ -10,6 +10,8 @@ const PREFIX = 'rpg-material:'
 export const KEYS = {
   /** 每个素材的状态、备注、提示词覆盖、字段覆盖。 */
   patches: PREFIX + 'patches',
+  /** 用户在界面上自己建的建筑。属于用户数据，会一起进存档文件。 */
+  custom: PREFIX + 'custom',
   /** 全局风格配置（视角约束 / 风格块 / 负面词 / 三套模板）。 */
   style: PREFIX + 'style',
   /** 界面偏好：筛选条件、选中项、面板宽度。 */

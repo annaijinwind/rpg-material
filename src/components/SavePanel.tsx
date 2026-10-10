@@ -27,6 +27,7 @@ function formatTime(ts: number): string {
 export function SavePanel() {
   const close = useAppStore((s) => s.toggleSave)
   const patches = useAppStore((s) => s.patches)
+  const customAssets = useAppStore((s) => s.customAssets)
   const style = useAppStore((s) => s.style)
   const lastExportAt = useAppStore((s) => s.lastExportAt)
   const markExported = useAppStore((s) => s.markExported)
@@ -45,10 +46,12 @@ export function SavePanel() {
   }, [patches, lastExportAt, count])
 
   const doExport = () => {
-    const save = buildSaveFile(patches, style)
+    const save = buildSaveFile(patches, style, customAssets)
     downloadText(saveFileName(save), serializeSaveFile(save), 'application/json')
     markExported()
-    toast(`已导出存档（${save.patchCount} 项）`)
+    toast(
+      `已导出存档（${save.patchCount} 项改动${save.customAssets.length ? `、${save.customAssets.length} 栋自建建筑` : ''}）`,
+    )
   }
 
   /** 先读进来放着，等用户确认了再替换——替换是不可逆的。 */
@@ -70,10 +73,13 @@ export function SavePanel() {
       setPending(null)
       return
     }
-    const { accepted, dropped } = applySave(result.save)
+    const { accepted, dropped, customAccepted, customDropped } = applySave(result.save)
     setPending(null)
     toast(
-      `已导入 ${accepted} 项${dropped ? `，忽略 ${dropped} 项当前目录里没有的` : ''}` +
+      `已导入 ${accepted} 项改动` +
+        (customAccepted ? `、${customAccepted} 栋自建建筑` : '') +
+        (dropped ? `，忽略 ${dropped} 项当前目录里没有的` : '') +
+        (customDropped ? `，忽略 ${customDropped} 栋不合格的自建建筑` : '') +
         (result.legacy ? '（旧版存档格式）' : ''),
     )
   }
@@ -103,7 +109,9 @@ export function SavePanel() {
             <div className="section-head">
               <h3>导出</h3>
               <span className="hint">
-                当前 {count} 项有修改 · 上次导出：{formatTime(lastExportAt)}
+                当前 {count} 项有修改
+                {customAssets.length ? ` · ${customAssets.length} 栋自建建筑` : ''} · 上次导出：
+                {formatTime(lastExportAt)}
               </span>
             </div>
             {dirtyCount > 0 && lastExportAt > 0 && (

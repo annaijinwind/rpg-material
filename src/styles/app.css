@@ -575,6 +575,38 @@
   margin-top: 2px;
 }
 
+/* 构件勾选 */
+.frag-group {
+  margin-bottom: 8px;
+}
+.frag-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.frag-group-name {
+  font-size: 11.5px;
+  color: var(--ink-2);
+  font-weight: 600;
+  min-width: 60px;
+}
+.frag-base {
+  color: var(--ink-3);
+}
+.frag-group .filter-row {
+  margin-top: 0;
+}
+.frag-group .chip {
+  cursor: pointer;
+}
+/* 基础关键词里已经有的构件：暗一点，提醒勾了就重复了 */
+.chip-in-base {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
 /* 关键词字段编辑 */
 .field-row {
   display: grid;
