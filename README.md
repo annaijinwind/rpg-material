@@ -50,6 +50,49 @@ pnpm typecheck  # tsc --noEmit
 民宅 / 铁匠铺 / 药铺 / 客栈 / 酒楼 / 衙门 / 寺庙 的 `size` / `features` / `details`
 直接取自文档 §7–§12 的原文关键词；其余 23 栋建筑按同一套词汇体系补齐。
 
+## 背景与抠图
+
+**提示词里不写「透明背景」。** 扩散模型输出的是没有 alpha 通道的 RGB 图，
+写「透明」它反而容易给你画一张 Photoshop 那种棋盘格。真正管用的是让背景好抠：
+
+- **纯白、均匀、无阴影、无倒影、无边框**
+- **主体完整在框内**，四边留出余量，**不被裁切、不被遮挡**（禁掉前景树枝、云、其它物体压在上面）
+- 负面词里额外禁掉 `checkerboard pattern`
+
+这样 rembg、PS 的「移除背景」这类工具能批量可靠地处理。
+
+### 阴影：分开「轮廓外的」和「轮廓内的」
+
+阴影是抠图最大的敌人，但**不是所有阴影都该杀**：
+
+| | 处理 | 为什么 |
+| --- | --- | --- |
+| **延伸到轮廓之外**的阴影 | 全部禁掉 | 会被算成主体的一部分，抠出来边缘全是脏的 |
+| **落在轮廓之内**的明暗 | **保留** | 屋顶的背光面、墙体的转折——这是形体感，杀了画面就平了 |
+
+所以提示词是**双向**的：一边把 `cast shadow` / `drop shadow` / `contact shadow` /
+`ambient occlusion` / `dark halo` 全部禁掉，一边明确写着
+`Shading that falls inside the asset itself is welcome and should stay, but nothing may bleed past its outline.`
+
+其中 **`ambient occlusion`（环境光遮蔽）和 `contact shadow`（接触阴影）是最容易漏的两种**——
+模型为了「把东西放在地上」会自动加物体落地处那圈变暗，用词上和 cast shadow 不是一回事，
+只写 `no drop shadow` 压不住。光照也改成正向要求：`soft, flat, shadowless ambient light`。
+
+**但不是所有素材都要白底**，按「它在游戏里怎么用」分：
+
+| | 哪些 | 背景要求 | 模板 |
+| --- | --- | --- | --- |
+| **要抠图**（66 项） | 建筑、装饰 | 纯白底、无投影、主体完整 | 建筑 / 装饰 |
+| **要抠图**（边界） | 墙体、栅栏、院墙门 | 白底 **+ 首尾相接** | 边界 |
+| **要抠图**（水面小件） | 木桥、码头、荷叶、芦苇 | 纯白底 | 地形（独立件） |
+| **不要抠图**（19 项） | 地面、道路、水面 | **满幅到边、不留白、不描边** | 地形 |
+
+地砖抠成透明就拼不成地图了——所以这些素材的提示词里**绝不能**出现白底。
+万一模板被误改，详情页会直接给警告。
+
+边界为什么要单独一套模板：它同时要两个互相拉扯的东西——**既能接成长长一段**
+（墙得首尾相接），**又要独立白底**（墙外的地面要透出来）。另外四套模板都只满足其中一边。
+
 ## 存档
 
 顶栏的「存档」面板有两个动作，就这两个：
@@ -105,7 +148,7 @@ pnpm typecheck  # tsc --noEmit
 链接本身也只存在这个浏览器里，**换电脑或清缓存之前记得导出备份**——
 导出的备份文件里含链接，导入后原样还原。
 
-## 相对文档做的两处归一
+## 相对文档做的三处归一
 
 1. **建筑英文名去掉了 `traditional Chinese` 前缀。**
    文档 §5 的模板已经有 `Traditional ancient Chinese fantasy {{BUILDING_TYPE}}.`，
@@ -118,6 +161,17 @@ pnpm typecheck  # tsc --noEmit
    文档 §17 和 §18 的收尾句略有出入（`Seamless tileable texture` / `Seamless tileable terrain`），
    统一成一套。另外木桥 / 码头 / 荷叶 / 芦苇 不是可拼接的 tile，
    用「seamless tileable」描述它们自相矛盾，这几项（`tileable: false`）走独立的收尾版本。
+
+3. **衙门和镖局的英文名加了模型认得的锚点。**
+   文档 §6.1 给的是 `yamen` 和 `escort agency`，但这两个词出图会跑偏：
+
+   - `yamen` 是全表唯一的罗马化中文词，模型没有视觉先验，只能瞎猜画风。
+     改成 `yamen, a magistrate's office and court compound`——保留原词，
+     后面补上 `magistrate`（县官，前现代官职，不会往现代拽）当锚点。
+   - 衙门的尺寸原本用 §11 的 `large official government compound`，
+     但 `government` 是个强现代词，会和统一风格打架。换成 §6.2 规范尺寸表里的 `large compound`。
+   - `escort agency` 在现代英语里有歧义（escort service），
+     改成 `armed escort house, a martial arts school for convoy bodyguards`。
 
 ## 加素材
 

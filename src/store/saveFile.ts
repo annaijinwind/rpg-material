@@ -1,5 +1,5 @@
 import { ASSET_BY_ID, CATALOG_VERSION } from '../data/assets'
-import { buildDefaultStyleConfig, type StyleConfig } from '../prompt/templates'
+import { buildDefaultStyleConfig, mergeStyle, type StyleConfig } from '../prompt/templates'
 import type { AssetPatch } from './useAppStore'
 
 /**
@@ -102,35 +102,6 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v)
 }
 
-/**
- * 存档里的风格配置来自「用户随手选的一个文件」，属于不可信输入，
- * 所以逐字段做类型检查再取值，而不是直接断言类型。
- * 缺字段或类型不对就用默认值补上。
- */
-function sanitizeStyle(raw: unknown, defaults: StyleConfig): SavedStyle {
-  const str = (v: unknown, fallback: string) => (typeof v === 'string' ? v : fallback)
-  const src = isPlainObject(raw) ? raw : {}
-  const neg = isPlainObject(src.negative) ? src.negative : {}
-  const tpl = isPlainObject(src.templates) ? src.templates : {}
-
-  return {
-    cameraClause: str(src.cameraClause, defaults.cameraClause),
-    styleBlock: str(src.styleBlock, defaults.styleBlock),
-    negative: {
-      building: str(neg.building, defaults.negative.building),
-      terrain: str(neg.terrain, defaults.negative.terrain),
-      decoration: str(neg.decoration, defaults.negative.decoration),
-    },
-    templates: {
-      building: str(tpl.building, defaults.templates.building),
-      terrain: str(tpl.terrain, defaults.templates.terrain),
-      terrainObject: str(tpl.terrainObject, defaults.templates.terrainObject),
-      decoration: str(tpl.decoration, defaults.templates.decoration),
-    },
-    appendNegativeInline: src.appendNegativeInline === true,
-  }
-}
-
 /** 写进存档前把 version 摘掉。 */
 function toSavedStyle(style: StyleConfig): SavedStyle {
   const { version: _version, ...rest } = style
@@ -207,7 +178,9 @@ export function parseSaveFile(text: string): ParseResult {
       exportedAt: typeof raw.exportedAt === 'string' ? raw.exportedAt : '',
       patchCount: Object.keys(patches).length,
       patches: patches as Record<string, AssetPatch>,
-      style: sanitizeStyle(style, buildDefaultStyleConfig()),
+      // 存档里的风格配置来自「用户随手选的一个文件」，属于不可信输入，
+      // 走 mergeStyle 逐字段校验类型，缺的、类型不对的都用默认值补
+      style: toSavedStyle(mergeStyle(style)),
     },
   }
 }

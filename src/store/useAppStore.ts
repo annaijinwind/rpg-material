@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { ASSETS, CATALOG_VERSION, validateCatalog } from '../data/assets'
 import type { Asset, AssetFamily, AssetStatus } from '../data/types'
-import { buildDefaultStyleConfig, type StyleConfig } from '../prompt/templates'
+import { buildDefaultStyleConfig, mergeStyle, type StyleConfig } from '../prompt/templates'
 import { KEYS, debounce, loadJson, saveJson } from './persist'
 import { pruneToCatalog, type SaveFile } from './saveFile'
 
@@ -110,17 +110,8 @@ function loadPatches(): Record<string, AssetPatch> {
 }
 
 function loadStyle(): StyleConfig {
-  const fallback = buildDefaultStyleConfig()
-  const raw = loadJson<Partial<StyleConfig> | null>(KEYS.style, null)
-  if (!raw || typeof raw !== 'object') return fallback
-  // 逐字段兜底：以后加字段时老数据也不会把应用带崩。
-  return {
-    ...fallback,
-    ...raw,
-    negative: { ...fallback.negative, ...(raw.negative ?? {}) },
-    templates: { ...fallback.templates, ...(raw.templates ?? {}) },
-    version: (raw.version ?? 0) + 1,
-  }
+  // mergeStyle 逐字段兜底：以后加字段、或者老数据里有已经删掉的字段，都不会把应用带崩。
+  return mergeStyle(loadJson<unknown>(KEYS.style, null))
 }
 
 function loadUi(): PersistedUi {

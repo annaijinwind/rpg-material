@@ -90,7 +90,7 @@ export function StyleSettings() {
           <div className="section">
             <div className="section-head">
               <h3>负面词</h3>
-              <span className="hint">按素材家族分开，粘到 Krea 各自的负面框</span>
+              <span className="hint">与背景要求同一套分类，粘到 Krea 的负面框</span>
             </div>
             <label className="field-item" style={{ marginBottom: 8 }}>
               <input
@@ -104,21 +104,17 @@ export function StyleSettings() {
               </span>
             </label>
             <Field
-              label="建筑"
-              value={style.negative.building}
-              onChange={(v) => patch({ negative: { ...style.negative, building: v } })}
-              rows={2}
+              label="独立主体"
+              hint="要抠图的那批：建筑 / 装饰 / 墙体 / 水面小件"
+              value={style.negative.isolated}
+              onChange={(v) => patch({ negative: { ...style.negative, isolated: v } })}
+              rows={3}
             />
             <Field
-              label="地形"
-              value={style.negative.terrain}
-              onChange={(v) => patch({ negative: { ...style.negative, terrain: v } })}
-              rows={2}
-            />
-            <Field
-              label="装饰"
-              value={style.negative.decoration}
-              onChange={(v) => patch({ negative: { ...style.negative, decoration: v } })}
+              label="铺满整格"
+              hint="不能抠的那批：地面 / 道路 / 水面"
+              value={style.negative.tile}
+              onChange={(v) => patch({ negative: { ...style.negative, tile: v } })}
               rows={2}
             />
           </div>
@@ -138,17 +134,24 @@ export function StyleSettings() {
             />
             <Field
               label="地形模板"
-              hint="文档 §17 / §18 / §20"
+              hint="文档 §17 / §18 / §20。地面 / 道路 / 水面——铺满整格，要满幅不要白底"
               value={style.templates.terrain}
               rows={12}
               onChange={(v) => patch({ templates: { ...style.templates, terrain: v } })}
             />
             <Field
               label="地形模板（独立件）"
-              hint="木桥 / 码头 / 荷叶 / 芦苇，这些不是可拼接的 tile"
+              hint="木桥 / 码头 / 荷叶 / 芦苇，这些不是铺满的 tile"
               value={style.templates.terrainObject}
               rows={12}
               onChange={(v) => patch({ templates: { ...style.templates, terrainObject: v } })}
+            />
+            <Field
+              label="边界模板"
+              hint="文档 §21。墙体要能首尾相接拼成长长一段，同时又要独立白底好抠图——所以单独一套"
+              value={style.templates.boundary}
+              rows={12}
+              onChange={(v) => patch({ templates: { ...style.templates, boundary: v } })}
             />
             <Field
               label="装饰模板"

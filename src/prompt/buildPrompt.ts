@@ -58,15 +58,34 @@ export function fillTemplate(template: string, vars: Record<string, string>): st
     .trim()
 }
 
-/** 取该素材适用的负面词。 */
-function negativeFor(asset: Asset, style: StyleConfig): string {
-  return style.negative[asset.family] ?? style.negative.building
+/**
+ * 这个素材生成出来是要「抠成透明 PNG」的，还是「铺满整格」的？
+ *
+ * 判据是「它在游戏里怎么用」，不是它属于哪个家族：
+ *   建筑 / 装饰 / 水面小件 → 叠在地图上，必须抠
+ *   墙体 / 围墙 / 栅栏      → 也要抠，墙外的地面得透出来
+ *   地面 / 道路 / 水面 tile → **不能抠**，它们要铺满整格；抠出透明反而拼不上
+ *
+ * 背景要求和负面词都按这个分。
+ */
+export function isIsolated(asset: Asset): boolean {
+  if (asset.family !== 'terrain') return true
+  if (asset.category === 'Boundary') return true
+  if (asset.tileable === false) return true
+  return false
 }
 
+/** 该素材用哪套模板。边界单独一份，因为它既要拼接又要白底。 */
 function templateFor(asset: Asset, style: StyleConfig): string {
   if (asset.family === 'building') return style.templates.building
   if (asset.family === 'decoration') return style.templates.decoration
+  if (asset.category === 'Boundary') return style.templates.boundary
   return asset.tileable === false ? style.templates.terrainObject : style.templates.terrain
+}
+
+/** 取该素材适用的负面词。 */
+function negativeFor(asset: Asset, style: StyleConfig): string {
+  return isIsolated(asset) ? style.negative.isolated : style.negative.tile
 }
 
 /** 组装该素材的模板变量表。没被模板引用的变量留着也无害。 */
@@ -146,6 +165,13 @@ export function buildPrompt(asset: Asset, style: StyleConfig): BuiltPrompt {
     warnings.push(`提示词偏长（${wordCount} 词），关键词太多时 Krea 容易抓不住重点`)
   }
   if (/\{\{\w+\}\}/.test(positive)) warnings.push('模板里有未识别的占位符，请到风格设置里检查')
+
+  // 这条路很容易踩：这是要铺满整格的 tile，一旦要求白底/透明，出来的图就没法拼图了。
+  if (!isIsolated(asset) && /white background|transparent/i.test(positive)) {
+    warnings.push(
+      '这是要铺满整格的地形贴图，提示词里出现了「白底 / 透明」——白底的砖拼不成地图，请去掉',
+    )
+  }
 
   return { assetId: asset.id, positive, negative, combined, parts, wordCount, warnings }
 }

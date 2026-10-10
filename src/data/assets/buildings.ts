@@ -139,8 +139,19 @@ export const BUILDINGS: Asset[] = [
     category: '建筑',
     phase: 1,
     zh: '衙门',
-    en: 'yamen',
-    size: 'large official government compound',
+    /**
+     * 类型词给了两个模型认得的锚点。
+     * 「yamen」本身就是个罗马化中文词，模型几乎没有先验，只写它容易画成别的画风；
+     * 「magistrate's office and court」是英文里能对上号的说法，而且 magistrate 是
+     * 前现代的官职，不会把风格往现代拽。
+     */
+    en: "yamen, a magistrate's office and court compound",
+    /**
+     * 尺寸原本写的是「large official government compound」（文档 §11 原话），
+     * 但 government 是个强现代词，会把模型往现代政府大楼带，和统一风格打架。
+     * 换成文档 §6.2 规范尺寸表里的「large compound」。
+     */
+    size: 'large compound',
     features: [
       'large entrance gate',
       'large courtyard',
@@ -167,7 +178,12 @@ export const BUILDINGS: Asset[] = [
     category: '建筑',
     phase: 1,
     zh: '镖局',
-    en: 'escort agency',
+    /**
+     * 原来的 'escort agency' 在现代英语里是有歧义的说法，模型容易被带偏。
+     * 镖局实际是「练武 + 押运」的行当，换成两个模型认得的锚点：
+     * martial arts school（有强视觉先验）+ convoy bodyguards（点明押运）。
+     */
+    en: 'armed escort house, a martial arts school for convoy bodyguards',
     size: 'medium-sized two-story building',
     features: [
       'large front courtyard',
