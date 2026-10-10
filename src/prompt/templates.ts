@@ -11,19 +11,54 @@
  */
 
 /**
- * 视角约束。取自文档 §3.1，是全局唯一的一份。
- * 五套模板都引用它——这是防止 Krea 生成斜 45 度视角的关键。
+ * 视角约束。文档 §3.1 的规则，但把「相机在哪、看得见什么」讲具体了。
+ *
+ * 只说「不要斜视」模型容易含糊——它需要知道**该看到什么**，而不只是**不该看到什么**。
+ * 所以这里先正向说清楚「正上方 90 度、只有一个角度、朝上的面填满画面、竖直面压成细边」，
+ * 再补一串排除项。
+ *
+ * 五套模板都引用它，是防止 Krea 生成斜 45 度视角的关键。
  */
-export const DEFAULT_CAMERA_CLAUSE = `Strict orthographic top-down view.
+export const DEFAULT_CAMERA_CLAUSE = `Strict orthographic top-down view, with the camera directly overhead pointing straight down at 90 degrees.
+The whole asset is seen from that one angle, with no vanishing point and no foreshortening.
+Whatever faces straight up fills the frame — for a building that means its roof, not its front — and vertical surfaces are compressed to thin edges.
+
+No perspective. No three-quarter view. No isometric view. No axonometric view.
+No tilt. No oblique angle. No elevated camera. No front view, no side view, no eye-level view.`
+
+/**
+ * 历史上出现过的默认视角约束。
+ *
+ * 用户如果一字没改，说明只是沿用了当时那版默认值，升级时直接换成新的；
+ * 真改过的则原样保留。没有这道迁移，改默认值对已经打开过页面的人是不生效的——
+ * localStorage 里存着旧的那份，mergeStyle 会一直拿它当「用户自定义」。
+ */
+const LEGACY_CAMERA_CLAUSES = [
+  `Strict orthographic top-down view.
 Directly viewed from above.
 Perfectly top-down.
 No perspective.
 No three-quarter view.
-No isometric view.`
+No isometric view.`,
+]
+
+/** 历史上出现过的默认风格块。理由同 LEGACY_CAMERA_CLAUSES。 */
+const LEGACY_STYLE_BLOCKS = [
+  'Traditional ancient Chinese fantasy architecture, dark wooden timber structure, gray curved tiled roofs, warm beige plaster walls, stone foundations, muted red architectural accents, red lanterns.',
+]
+
+/**
+ * 字段还停在某个历史默认值上，说明用户一字没改，升级到当前默认值；改过的原样保留。
+ * 没有这道升级，改默认值对已经打开过页面的人是不生效的——
+ * localStorage 里存着旧的那份，会被一直当成「用户自定义」。
+ */
+function upgradeIfUntouched(stored: string, legacy: readonly string[], current: string): string {
+  return legacy.includes(stored) ? current : stored
+}
 
 /** 统一美术风格。取自文档 §4。 */
 export const DEFAULT_STYLE_BLOCK =
-  'Traditional ancient Chinese fantasy architecture, dark wooden timber structure, gray curved tiled roofs, warm beige plaster walls, stone foundations, muted red architectural accents, red lanterns.'
+  'Traditional ancient Chinese fantasy architecture, dark wooden timber structure, gray curved tiled roofs, warm beige plaster walls, stone foundations, muted red architectural accents.'
 
 /**
  * 独立主体的背景要求：建筑 / 装饰 / 边界 / 水面小件。
@@ -238,9 +273,15 @@ export function mergeStyle(raw: unknown, defaults = buildDefaultStyleConfig()): 
   const neg = isPlainObject(src.negative) ? src.negative : {}
   const tpl = isPlainObject(src.templates) ? src.templates : {}
 
+  const storedCamera = str(src.cameraClause, defaults.cameraClause)
+
   return {
-    cameraClause: str(src.cameraClause, defaults.cameraClause),
-    styleBlock: str(src.styleBlock, defaults.styleBlock),
+    cameraClause: upgradeIfUntouched(storedCamera, LEGACY_CAMERA_CLAUSES, defaults.cameraClause),
+    styleBlock: upgradeIfUntouched(
+      str(src.styleBlock, defaults.styleBlock),
+      LEGACY_STYLE_BLOCKS,
+      defaults.styleBlock,
+    ),
     negative: {
       isolated: str(neg.isolated, defaults.negative.isolated),
       tile: str(neg.tile, defaults.negative.tile),

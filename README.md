@@ -50,6 +50,29 @@ pnpm typecheck  # tsc --noEmit
 民宅 / 铁匠铺 / 药铺 / 客栈 / 酒楼 / 衙门 / 寺庙 的 `size` / `features` / `details`
 直接取自文档 §7–§12 的原文关键词；其余 23 栋建筑按同一套词汇体系补齐。
 
+## 视角
+
+视角约束是**全局唯一一份**，五套模板都引用它——这是文档 §3.1 防止 Krea 生成斜 45 度视角的关键。
+
+写法上刻意做了两层：
+
+1. **正向描述该看到什么**：相机正上方 90 度、只有一个角度没有灭点、**朝上的面填满画面**
+   （"for a building that means its roof, not its front"）、竖直面压成细边。
+2. **再列排除项**：no perspective / three-quarter / isometric / axonometric / tilt / oblique angle /
+   elevated camera / front view / side view / eye-level view。
+
+只写排除项是不够的——模型需要知道**该看到什么**，不只是**不该看到什么**。
+
+### 一个教训：不要在关键词里要求「可见」
+
+铁匠铺原本照抄文档 §7.2 的 `visible forge`，结果只有它角度跑偏。原因是
+**`visible` 是在要求「看得见」**，而正俯视下根本看不到铺子内部——模型为了满足这个要求，
+就会去切掉屋顶或者把镜头斜过来。
+
+它也是全部 30 栋建筑里唯一一个 `visible`。改成 `stone forge` 即可。
+**写关键词时要检查：这个词描述的是「顶视图里看得见的东西」，还是「需要看进去才能看到的东西」。**
+后者一律不要写。
+
 ## 背景与抠图
 
 **提示词里不写「透明背景」。** 扩散模型输出的是没有 alpha 通道的 RGB 图，

@@ -5,7 +5,13 @@ import type { Asset } from '../types'
  *
  * 民宅 / 铁匠铺 / 药铺 / 客栈 / 酒楼 / 衙门 / 寺庙 的 size / features / details
  * 直接取自文档 §7–§12 给出的原文关键词；其余按同一套词汇体系补齐
- * （深色木结构、灰瓦屋顶、暖米色墙、石质基座、暗红装饰、红灯笼）。
+ * （深色木结构、灰瓦屋顶、暖米色墙、石质基座、暗红装饰）。
+ *
+ * 关于红灯笼：只有大型 / 门面性的建筑才在 details 里写灯笼，
+ * 目前是这 14 栋：衙门、寺庙、大型寺庙、酒楼、客栈、茶馆、戏台、大户宅院、
+ * 大型宅院、官员住宅、商人宅邸、城门、城楼、市集。
+ * 小铺子、仓库、杂役房一律不写；民宅也不写——它放得最多，家家挂灯反而假。
+ * 之前风格块末尾带了个 red lanterns，等于给每一栋都塞了灯笼——已经去掉。
  */
 export const BUILDINGS: Asset[] = [
   // ── 第一阶段 ──────────────────────────────────────────────
@@ -18,7 +24,7 @@ export const BUILDINGS: Asset[] = [
     en: 'ordinary residence',
     size: 'small single-story building',
     features: ['small courtyard', 'wooden entrance', 'simple windows', 'small storage area'],
-    details: ['wooden beams', 'gray tiled roof', 'stone steps', 'red lantern', 'small flower pots'],
+    details: ['wooden beams', 'gray tiled roof', 'stone steps', 'small flower pots'],
     tags: ['民宅', '普通民宅', '住宅', 'minzhai', 'mz', 'zhuzhai', 'residence', 'house'],
   },
   {
@@ -31,7 +37,13 @@ export const BUILDINGS: Asset[] = [
     size: 'medium-sized single-story building',
     features: [
       'large open blacksmith workshop',
-      'visible forge',
+      /**
+       * 原本照抄文档 §7.2 的 'visible forge'。但「visible」是在要求「看得见」，
+       * 而正俯视下根本看不到铺子内部——模型为了满足它，就会去切屋顶或把镜头斜过来。
+       * 这是全部 30 栋建筑里唯一一个 visible，也正好只有铁匠铺角度跑偏。
+       * 去掉这个词，保留 forge 本身。
+       */
+      'stone forge',
       'anvil',
       'wooden workbench',
       'weapon racks',
@@ -41,7 +53,6 @@ export const BUILDINGS: Asset[] = [
       'stacked firewood',
       'wooden crates',
       'storage area',
-      'hanging red lanterns',
     ],
     tags: ['铁匠铺', '铁匠', '打铁', 'tiejiangpu', 'tjp', 'blacksmith', 'forge'],
   },
@@ -62,7 +73,6 @@ export const BUILDINGS: Asset[] = [
     ],
     details: [
       'wooden signboard',
-      'hanging red lanterns',
       'cloth awning',
       'wooden crates',
       'small storage room',
@@ -86,7 +96,7 @@ export const BUILDINGS: Asset[] = [
       'wooden counter',
       'small storage room',
     ],
-    details: ['gray tiled roof', 'wooden beams', 'stone steps', 'red lantern', 'drying herb racks'],
+    details: ['gray tiled roof', 'wooden beams', 'stone steps', 'drying herb racks'],
     tags: ['药铺', '药店', '中药', 'yaopu', 'yp', 'apothecary', 'pharmacy', 'medicine'],
   },
   {
@@ -169,6 +179,7 @@ export const BUILDINGS: Asset[] = [
       'warm beige plaster walls',
       'stone foundation',
       'muted red architectural accents',
+      'hanging red lanterns',
     ],
     tags: ['衙门', '官府', '县衙', 'yamen', 'ym', 'government', 'office'],
   },
@@ -197,7 +208,6 @@ export const BUILDINGS: Asset[] = [
       'wooden pillars',
       'stone base',
       'gray tiled roof',
-      'hanging red lanterns',
       'wooden crates',
       'blank fabric banners',
     ],
@@ -271,7 +281,6 @@ export const BUILDINGS: Asset[] = [
       'stone foundation',
       'gray tiled roof',
       'dark wooden beams',
-      'red lanterns',
       'stacked wooden chests',
     ],
     tags: ['钱庄', '银号', '银行', 'qianzhuang', 'qz', 'money exchange', 'bank'],
@@ -295,7 +304,6 @@ export const BUILDINGS: Asset[] = [
       'tall dark wooden facade',
       'blank wooden signboard',
       'stone base',
-      'red lanterns',
       'gray tiled roof',
     ],
     tags: ['当铺', '典当', 'dangpu', 'dp', 'pawnshop', 'pawn'],
@@ -315,7 +323,7 @@ export const BUILDINGS: Asset[] = [
       'wooden shelves',
       'fitting corner',
     ],
-    details: ['wooden hanging rail', 'cloth rolls', 'window shutters', 'stone step', 'small red lantern'],
+    details: ['wooden hanging rail', 'cloth rolls', 'window shutters', 'stone step'],
     tags: ['裁缝铺', '裁缝', '布店', 'caifengpu', 'cfp', 'tailor', 'clothing'],
   },
   {
@@ -572,6 +580,7 @@ export const BUILDINGS: Asset[] = [
       'decorative roof ridges',
       'stone steps',
       'courtyard trees',
+      'red lanterns',
     ],
     tags: ['大型寺庙', '大庙', 'daxing simiao', 'dxsm', 'large temple', 'pagoda'],
   },
@@ -644,7 +653,6 @@ export const BUILDINGS: Asset[] = [
       'rope coils',
       'wooden barrels',
       'stone embankment',
-      'hanging lantern',
     ],
     tags: ['码头', '渡口', 'matou', 'mt', 'dock', 'pier', 'wharf'],
   },
