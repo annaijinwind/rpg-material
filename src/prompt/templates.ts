@@ -27,6 +27,21 @@ No perspective. No three-quarter view. No isometric view. No axonometric view.
 No tilt. No oblique angle. No elevated camera. No front view, no side view, no eye-level view.`
 
 /**
+ * 直立物体的视角约束：树、石灯笼、木招牌、水缸这类「有高度、要靠轮廓辨认」的素材。
+ *
+ * 为什么不能只靠正俯视：从正上方看一棵树就是一团绿色，看不出是树。
+ * 2D RPG 里的树从来不是画成正俯视的，而是接近正面、略微俯一点，露出树干。
+ *
+ * 注意这段是**替换** `cameraClause`，不是在后面追加——
+ * 如果两条约束同时出现在提示词里（一条说「必须正俯视」，一条说「别正俯视」），
+ * 模型会随机听一条，结果不可预期。
+ */
+export const DEFAULT_CAMERA_UPRIGHT = `Top-down game asset, drawn the way tall objects appear on a 2D RPG map: the object stands upright in the frame.
+The view is near-frontal and only slightly above, so both the base of the object and its full height are readable — not a flat plan view looking straight down at its top.
+
+No isometric view, no full side view, no horizon, no sky, no ground plane, no cast shadow.`
+
+/**
  * 历史上出现过的默认视角约束。
  *
  * 用户如果一字没改，说明只是沿用了当时那版默认值，升级时直接换成新的；
@@ -213,6 +228,7 @@ export const DEFAULT_NEGATIVE = {
 export function buildDefaultStyleConfig(): StyleConfig {
   return {
     cameraClause: DEFAULT_CAMERA_CLAUSE,
+    cameraUpright: DEFAULT_CAMERA_UPRIGHT,
     styleBlock: DEFAULT_STYLE_BLOCK,
     negative: { ...DEFAULT_NEGATIVE },
     templates: {
@@ -233,8 +249,10 @@ export function buildDefaultStyleConfig(): StyleConfig {
 }
 
 export interface StyleConfig {
-  /** 视角约束，五套模板共用。 */
+  /** 视角约束，默认那份（正俯视），五套模板共用。 */
   cameraClause: string
+  /** 直立物体（树 / 石灯笼 / 木招牌 / 水缸）用的视角约束，会替换掉 cameraClause。 */
+  cameraUpright: string
   /** 统一美术风格块，建筑模板默认引用。 */
   styleBlock: string
   /** 两套负面词：独立主体（要抠图）/ 铺满整格（不能抠）。 */
@@ -277,6 +295,8 @@ export function mergeStyle(raw: unknown, defaults = buildDefaultStyleConfig()): 
 
   return {
     cameraClause: upgradeIfUntouched(storedCamera, LEGACY_CAMERA_CLAUSES, defaults.cameraClause),
+    // 新字段：老配置里没有，直接用默认值
+    cameraUpright: str(src.cameraUpright, defaults.cameraUpright),
     styleBlock: upgradeIfUntouched(
       str(src.styleBlock, defaults.styleBlock),
       LEGACY_STYLE_BLOCKS,

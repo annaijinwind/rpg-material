@@ -96,7 +96,8 @@ function varsFor(asset: Asset, style: StyleConfig, negative: string): Record<str
     : joinSentences(asset.features)
 
   return {
-    CAMERA: style.cameraClause,
+    // 直立物体（树 / 石灯笼 / 招牌）换一整段视角约束，不是追加
+    CAMERA: asset.upright ? style.cameraUpright : style.cameraClause,
     STYLE_BLOCK: style.styleBlock,
     NEGATIVE: negative,
 

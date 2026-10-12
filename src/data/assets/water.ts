@@ -119,8 +119,9 @@ export const WATER: Asset[] = [
     category: 'Water',
     zh: '芦苇',
     en: 'Traditional ancient Chinese town water reeds.',
+    upright: true,
     features: [
-      'A small clump of tall thin water reeds and cattails growing from shallow water, seen from directly above',
+      'A small clump of tall thin water reeds and cattails standing in shallow water',
     ],
     tileable: false,
     tags: ['芦苇', '芦草', 'luwei', 'lw', 'reeds', 'cattail'],

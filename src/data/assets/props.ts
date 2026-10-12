@@ -11,6 +11,7 @@ export const PROPS: Asset[] = [
     category: '杂物',
     zh: '红灯笼',
     en: 'hanging red lantern',
+    upright: true,
     features: [
       'A single round red paper lantern in a warm muted red tone, with a dark wooden cap and base and a short hanging tassel',
     ],
@@ -22,6 +23,7 @@ export const PROPS: Asset[] = [
     category: '杂物',
     zh: '石灯笼',
     en: 'stone lantern',
+    upright: true,
     features: [
       'A single carved gray stone lantern with a small roofed light chamber on a stepped stone base',
     ],
@@ -44,6 +46,7 @@ export const PROPS: Asset[] = [
     category: '杂物',
     zh: '水缸',
     en: 'large water jar',
+    upright: true,
     features: [
       'A single large glazed ceramic water jar with a wide mouth and slightly weathered surface',
     ],
@@ -66,6 +69,7 @@ export const PROPS: Asset[] = [
     category: '杂物',
     zh: '木桶',
     en: 'wooden barrel',
+    upright: true,
     features: ['A single wooden barrel with vertical staves and dark metal hoops'],
     tags: ['木桶', '桶', 'mutong', 'mt', 'barrel', 'cask'],
   },
@@ -86,7 +90,7 @@ export const PROPS: Asset[] = [
     category: '杂物',
     zh: '麻袋',
     en: 'cloth sack of grain',
-    features: ['A single tied cloth sack of grain standing upright with a folded top'],
+    features: ['A single tied cloth sack of grain with a folded top'],
     tags: ['麻袋', '袋子', '粮食袋', 'madai', 'md', 'sack', 'bag', 'grain sack'],
   },
   {
@@ -117,7 +121,8 @@ export const PROPS: Asset[] = [
     category: '杂物',
     zh: '花盆',
     en: 'flower pot',
-    features: ['A single ceramic flower pot with a small flowering plant, seen from directly above'],
+    upright: true,
+    features: ['A single ceramic flower pot holding a small flowering plant'],
     tags: ['花盆', '盆栽', 'huapen', 'hp', 'flower pot', 'potted plant', 'planter'],
   },
   {
@@ -137,6 +142,7 @@ export const PROPS: Asset[] = [
     category: '杂物',
     zh: '木招牌',
     en: 'wooden signboard',
+    upright: true,
     features: [
       'A single vertical wooden signboard on a dark timber post, with a completely blank unmarked face',
     ],

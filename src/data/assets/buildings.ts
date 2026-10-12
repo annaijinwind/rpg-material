@@ -301,7 +301,7 @@ export const BUILDINGS: Asset[] = [
       'shuttered windows',
     ],
     details: [
-      'tall dark wooden facade',
+      'dark timber structure',
       'blank wooden signboard',
       'stone base',
       'gray tiled roof',
@@ -451,7 +451,7 @@ export const BUILDINGS: Asset[] = [
     size: 'large single-story building',
     features: [
       'large loading doors',
-      'tall storage space',
+      'large storage floor',
       'stacked crates',
       'loading yard',
       'wooden ramp',

@@ -8,8 +8,9 @@ export const NATURE: Asset[] = [
     category: '树木',
     zh: '柳树',
     en: 'weeping willow tree',
+    upright: true,
     features: [
-      'A single weeping willow with a broad drooping canopy of slender leaves, seen from directly above',
+      'A single weeping willow with a broad drooping canopy of slender leaves hanging down around a dark trunk',
     ],
     tags: ['柳树', '垂柳', 'liushu', 'ls', 'willow', 'weeping willow', 'tree'],
   },
@@ -19,8 +20,9 @@ export const NATURE: Asset[] = [
     category: '树木',
     zh: '松树',
     en: 'pine tree',
+    upright: true,
     features: [
-      'A single pine tree with layered dark green needle clusters radiating from a central trunk, seen from directly above',
+      'A single pine tree with layered dark green needle clusters rising in tiers above a dark trunk',
     ],
     tags: ['松树', '松', 'songshu', 'ss', 'pine', 'conifer', 'tree'],
   },
@@ -30,8 +32,9 @@ export const NATURE: Asset[] = [
     category: '树木',
     zh: '竹子',
     en: 'bamboo cluster',
+    upright: true,
     features: [
-      'A small cluster of tall bamboo stalks with narrow leaves, seen from directly above',
+      'A small cluster of tall bamboo stalks with narrow leaves, rising from the ground',
     ],
     tags: ['竹子', '竹', 'zhuzi', 'zz', 'bamboo', 'bamboo grove'],
   },
@@ -41,8 +44,9 @@ export const NATURE: Asset[] = [
     category: '树木',
     zh: '普通树',
     en: 'ordinary broadleaf tree',
+    upright: true,
     features: [
-      'A single broadleaf tree with a rounded layered canopy of muted green foliage, seen from directly above',
+      'A single broadleaf tree with a rounded layered canopy of muted green foliage above a dark trunk',
     ],
     tags: ['普通树', '树', 'shu', 's', 'tree', 'broadleaf', 'foliage'],
   },
@@ -52,7 +56,8 @@ export const NATURE: Asset[] = [
     category: '树木',
     zh: '灌木',
     en: 'low shrub',
-    features: ['A single small low shrub with dense rounded foliage, seen from directly above'],
+    upright: true,
+    features: ['A single small low shrub with dense rounded foliage'],
     tags: ['灌木', '矮树丛', 'guanmu', 'gm', 'shrub', 'bush'],
   },
   {
@@ -62,7 +67,7 @@ export const NATURE: Asset[] = [
     zh: '草丛',
     en: 'grass clump',
     features: [
-      'A small clump of tall wild grass blades fanning out from a central point, seen from directly above',
+      'A small clump of long wild grass blades fanning out from a central point, seen from directly above',
     ],
     tags: ['草丛', '草', 'caocong', 'cc', 'grass clump', 'tall grass'],
   },
@@ -72,8 +77,9 @@ export const NATURE: Asset[] = [
     category: '树木',
     zh: '假山',
     en: 'scholar rock',
+    upright: true,
     features: [
-      'A single weathered gray scholar rock with irregular hollows and a gnarled silhouette, seen from directly above',
+      'A single weathered gray scholar rock with irregular hollows and a gnarled upright silhouette',
     ],
     tags: ['假山', '石头', '景观石', 'jiashan', 'js', 'rock', 'scholar rock', 'boulder'],
   },

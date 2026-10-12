@@ -80,6 +80,14 @@ export function StyleSettings() {
           />
 
           <Field
+            label="视角约束（直立物体）"
+            hint="树 / 石灯笼 / 木招牌这类「有高度、要靠轮廓辨认」的素材用它替换上一段"
+            value={style.cameraUpright}
+            rows={4}
+            onChange={(v) => patch({ cameraUpright: v })}
+          />
+
+          <Field
             label="统一美术风格块"
             hint="取自文档 §4，建筑模板默认引用"
             value={style.styleBlock}
