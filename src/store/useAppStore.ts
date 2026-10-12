@@ -68,6 +68,7 @@ interface AppState {
   settingsOpen: boolean
   batchOpen: boolean
   saveOpen: boolean
+  refsOpen: boolean
   lastExportAt: number
 
   setQuery: (patch: Partial<Query>) => void
@@ -76,6 +77,7 @@ interface AppState {
   toggleSettings: (open?: boolean) => void
   toggleBatch: (open?: boolean) => void
   toggleSave: (open?: boolean) => void
+  toggleRefs: (open?: boolean) => void
   setSidebarWidth: (w: number) => void
 
   setStatus: (id: string, status: AssetStatus) => void
@@ -232,6 +234,7 @@ export const useAppStore = create<AppState>((set, get) => {
     settingsOpen: false,
     batchOpen: false,
     saveOpen: false,
+    refsOpen: false,
     lastExportAt: initialUi.lastExportAt,
 
     setQuery: (patch) => {
@@ -249,6 +252,7 @@ export const useAppStore = create<AppState>((set, get) => {
     toggleSettings: (open) => set({ settingsOpen: open ?? !get().settingsOpen }),
     toggleBatch: (open) => set({ batchOpen: open ?? !get().batchOpen }),
     toggleSave: (open) => set({ saveOpen: open ?? !get().saveOpen }),
+    toggleRefs: (open) => set({ refsOpen: open ?? !get().refsOpen }),
     setSidebarWidth: (w) => {
       set({ sidebarWidth: Math.min(420, Math.max(180, w)) })
       persistUi(uiSnapshot())

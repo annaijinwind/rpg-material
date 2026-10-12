@@ -4,6 +4,7 @@ import { BatchPanel } from './components/BatchPanel'
 import { Sidebar } from './components/Sidebar'
 import { StyleSettings } from './components/StyleSettings'
 import { AssetList } from './components/AssetList'
+import { ReferencePanel } from './components/ReferencePanel'
 import { SavePanel } from './components/SavePanel'
 import { Toolbar, focusSearch } from './components/Toolbar'
 import { ToastHost } from './components/Toast'
@@ -15,6 +16,7 @@ function Header() {
   const openSettings = useAppStore((s) => s.toggleSettings)
   const openBatch = useAppStore((s) => s.toggleBatch)
   const openSave = useAppStore((s) => s.toggleSave)
+  const openRefs = useAppStore((s) => s.toggleRefs)
 
   const done = stats.byStatus.generated + stats.byStatus.approved
   const percent = stats.total ? Math.round((done / stats.total) * 100) : 0
@@ -34,6 +36,9 @@ function Header() {
           {done} / {stats.total}
         </span>
       </div>
+      <button type="button" className="btn" onClick={() => openRefs(true)}>
+        设计图
+      </button>
       <button type="button" className="btn" onClick={() => openSave(true)}>
         存档
       </button>
@@ -52,6 +57,7 @@ export default function App() {
   const settingsOpen = useAppStore((s) => s.settingsOpen)
   const batchOpen = useAppStore((s) => s.batchOpen)
   const saveOpen = useAppStore((s) => s.saveOpen)
+  const refsOpen = useAppStore((s) => s.refsOpen)
   const selectedId = useAppStore((s) => s.selectedId)
   const select = useAppStore((s) => s.select)
   const assets = useFilteredAssets()
@@ -107,6 +113,7 @@ export default function App() {
           <AssetDetail />
         </section>
       </div>
+      {refsOpen && <ReferencePanel />}
       {saveOpen && <SavePanel />}
       {settingsOpen && <StyleSettings />}
       {batchOpen && <BatchPanel />}
